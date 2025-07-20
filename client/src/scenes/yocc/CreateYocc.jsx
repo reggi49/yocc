@@ -12,6 +12,7 @@ import {
   Step,
   StepLabel,
   Grid,
+  Paper,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import React, { useContext, useEffect, useState, useRef } from "react";
@@ -26,13 +27,10 @@ import AddIcon from "@mui/icons-material/Add";
 import { Vibrant } from "node-vibrant/browser";
 import { privateInstance } from "../../utils/apiInstances";
 import Input from "../../components/Input";
+import ReplayIcon from "@mui/icons-material/Replay";
 
-const Loader = () => (
-  <Stack p="40px 0 10px" alignItems="center">
-    <CircularProgress size={25} />
-  </Stack>
-);
 
+// --- Helper Component ---
 const ImagePreview = ({ label, imageSrc, onClick, sx = {} }) => (
   <Box
     onClick={onClick}
@@ -51,118 +49,47 @@ const ImagePreview = ({ label, imageSrc, onClick, sx = {} }) => (
       justifyContent: "center",
       bgcolor: "grey.50",
       transition: "background-color 0.3s",
-      "&:hover": {
-        bgcolor: "grey.100",
+      '&:hover': {
+        bgcolor: 'grey.100',
       },
       ...sx,
     }}
   >
     {imageSrc ? (
-      <img
-        src={imageSrc}
-        alt={`${label} preview`}
-        style={{ maxHeight: "100%", maxWidth: "100%", objectFit: "contain" }}
-      />
+      <img src={imageSrc} alt={`${label} preview`} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
     ) : (
       <>
-        <AddPhotoAlternateIcon
-          sx={{ fontSize: 40, color: "grey.500", mb: 1 }}
-        />
+        <AddPhotoAlternateIcon sx={{ fontSize: 40, color: "grey.500", mb: 1 }} />
         <Typography color="text.secondary">{label}</Typography>
       </>
     )}
   </Box>
 );
 
-const steps = ["Select Texture & Color", "Edit Your Image"];
+const steps = ["Select Texture & Color", "Generate Your Image", "View Result"];
 
+// --- Main Component ---
 const CreateYocc = () => {
-  const isMobile = useMediaQuery("(max-width:767px)");
-  const [page, setPage] = useState(1);
-  const dispatch = useDispatch();
-  const { toggleBackdrop } = useContext(backdropContext);
-  const [notInitRender, setNotInitRender] = useState(false);
-  const navigate = useNavigate();
-  const [image, setImage] = useState(null);
-  const [colors, setColors] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const fileInputRef = useRef(null);
-  const [selectedColor, setSelectedColor] = useState(null);
-  const [referenceImage, setReferenceImage] = useState(null);
-  const [showReferenceSection, setShowReferenceSection] = useState(false);
-  const [generatedPrompt, setGeneratedPrompt] = useState(false);
-  const [isExtracting, setIsExtracting] = useState(false);
-  const [baseImageFile, setBaseImageFile] = useState(null);
-  const [textureImageFile, setTextureImageFile] = useState(null);
-  const [baseImagePreview, setBaseImagePreview] = useState("");
-  const [textureImagePreview, setTextureImagePreview] = useState("");
-  const [prompt, setPrompt] = useState(
-    "Strictly follow these instructions. You are an image editing tool. Your only output must be the edited image, with no accompanying text, comments, or explanations. Using the first image provided (the base image), replace the texture of the sofa with the texture from the second image provided. Maintain the original shape, lighting, shadows, and perspective perfectly. The rest of the scene must remain unchanged."
-  );
-  const [generatedImage, setGeneratedImage] = useState(null);
-  const [error, setError] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
+  // State untuk mengontrol langkah saat ini
   const [activeStep, setActiveStep] = useState(0);
 
+  // State untuk data yang dibawa antar langkah
+  const [textureImageFile, setTextureImageFile] = useState(null);
+  const [textureImagePreview, setTextureImagePreview] = useState("");
+  const [selectedColor, setSelectedColor] = useState(null);
+  const [baseImageFile, setBaseImageFile] = useState(null);
+  const [baseImagePreview, setBaseImagePreview] = useState("");
+  const [prompt, setPrompt] = useState("");
+  const [generatedImage, setGeneratedImage] = useState(null);
+
+  // State untuk UI (loading, error)
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [colors, setColors] = useState(null);
+
   // Refs untuk input file
-  const baseImageRef = useRef(null);
-  const textureImageRef = useRef(null);
   const textureInputRef = useRef(null);
   const baseInputRef = useRef(null);
-
-  const handleTextureUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setTextureImageFile(file);
-    setIsExtracting(true);
-    setColors(null);
-    setSelectedColor(null);
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const imgSrc = event.target.result;
-      setTextureImagePreview(imgSrc);
-      extractColors(imgSrc);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const extractColors = (imgSrc) => {
-    Vibrant.from(imgSrc)
-      .getPalette()
-      .then((palette) => {
-        setColors({
-          Vibrant: palette.Vibrant?.hex,
-          DarkVibrant: palette.DarkVibrant?.hex,
-          LightVibrant: palette.LightVibrant?.hex,
-          Muted: palette.Muted?.hex,
-          DarkMuted: palette.DarkMuted?.hex,
-          LightMuted: palette.LightMuted?.hex,
-        });
-        setIsExtracting(false);
-      })
-      .catch((err) => {
-        console.error("Error extracting colors:", err);
-        setError("Could not extract colors from this image.");
-        setIsExtracting(false);
-      });
-  };
-
-  const handleColorSelect = (color) => {
-    setSelectedColor(color);
-  };
-
-  const handleNextStep = () => {
-    // Siapkan prompt untuk langkah kedua
-    const newPrompt = `Strictly follow these instructions. You are an expert photo editor. Your only output must be the edited image, with no accompanying text or explanation. From the first image provided (the base image), identify the main seating object (sofa, chair, or bench). Replace the texture of ONLY that seating object with the texture from the second image provided. The color of the new texture must be precisely ${selectedColor}. Maintain the original shape, folds, lighting, and shadows of the seating object perfectly. All other elements in the room must remain completely unchanged.`;
-    setPrompt(newPrompt);
-    setActiveStep((prev) => prev + 1);
-  };
-
-  const handleBackStep = () => {
-    setActiveStep((prev) => prev - 1);
-  };
 
   const handleFileChange = (e, setImageFile, setImagePreview) => {
     const file = e.target.files[0];
@@ -172,16 +99,76 @@ const CreateYocc = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  // --- Functions ---
+  const handleTextureUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setTextureImageFile(file);
+    setIsLoading(true);
+    setError("");
+    setColors(null);
+    setSelectedColor(null);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imgSrc = event.target.result;
+      setTextureImagePreview(imgSrc);
+      Vibrant.from(imgSrc).getPalette()
+        .then((palette) => {
+          setColors({
+            Vibrant: palette.Vibrant?.hex,
+            DarkVibrant: palette.DarkVibrant?.hex,
+            LightVibrant: palette.LightVibrant?.hex,
+            Muted: palette.Muted?.hex,
+          });
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          console.error("Error extracting colors:", err);
+          setError("Could not extract colors from image.");
+          setIsLoading(false);
+        });
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  const handleNext = () => {
+    if (activeStep === 0) {
+      const newPrompt = `Strictly follow these instructions. You are an expert photo editor. Your only output must be the edited image, with no accompanying text or explanation. From the first image provided (the base image), identify the main seating object (sofa, chair, or bench). Replace the texture of ONLY that seating object with the texture from the second image provided. The color of the new texture must be precisely ${selectedColor}. Maintain the original shape, folds, lighting, and shadows of the seating object perfectly. All other elements in the room must remain completely unchanged.`;
+      setPrompt(newPrompt);
+    }
+    setActiveStep((prev) => prev + 1);
+  };
+
+  const handleBack = () => {
+    setError("");
+    setActiveStep((prev) => prev - 1);
+  };
+  
+  const handleReset = () => {
+    setActiveStep(0);
+    setTextureImageFile(null);
+    setTextureImagePreview("");
+    setSelectedColor(null);
+    setBaseImageFile(null);
+    setBaseImagePreview("");
+    setPrompt("");
+    setGeneratedImage(null);
+    setIsLoading(false);
+    setError("");
+    setColors(null);
+  }
+
+  const handleGenerateSubmit = async (e) => {
     e.preventDefault();
     if (!baseImageFile || !textureImageFile || !prompt) {
-      setError("Please provide a base image, a texture image, and a prompt.");
+      setError("Please complete all required fields.");
       return;
     }
-
-    setIsGenerating(true);
+    
+    setIsLoading(true);
     setError("");
-    setGeneratedImage(null);
 
     const formData = new FormData();
     formData.append("baseImage", baseImageFile);
@@ -189,7 +176,6 @@ const CreateYocc = () => {
     formData.append("prompt", prompt);
 
     try {
-      // Pastikan nama endpoint ini benar
       const response = await privateInstance.post(
         "/api/v1/dalle/edit-with-texture",
         formData,
@@ -200,20 +186,21 @@ const CreateYocc = () => {
       );
       const imageUrl = URL.createObjectURL(response.data);
       setGeneratedImage(imageUrl);
+      handleNext(); // Pindah ke langkah 3 setelah berhasil
     } catch (err) {
       console.error("Image generation failed:", err);
-      setError(
-        "Failed to generate image. Please check server logs for details."
-      );
+      setError("Failed to generate image. The model may not support this request. Please try a different image or prompt.");
     } finally {
-      setIsGenerating(false);
+      setIsLoading(false);
     }
   };
 
+
+  // --- Render Logic ---
   return (
     <Box p={{ xs: "20px 5%", md: "50px 10%" }}>
-      <Typography variant="h4" textAlign="center" fontWeight="bold" mb={1}>
-        AI Image Editor
+      <Typography variant="h3" textAlign="center" fontWeight="bold" mb={1}>
+        Make Your Imagination Come True
       </Typography>
       <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 5 }}>
         {steps.map((label) => (
@@ -234,18 +221,19 @@ const CreateYocc = () => {
             style={{ display: "none" }}
           />
           <ImagePreview
-            label="Upload Texture / Reference Image"
+            label="1. Upload Your Texture Image"
             imageSrc={textureImagePreview}
             onClick={() => textureInputRef.current.click()}
             sx={{ maxWidth: "400px" }}
           />
 
-          {isExtracting && <CircularProgress />}
+          {isLoading && <CircularProgress />}
+          {error && <Alert severity="error">{error}</Alert>}
 
           {colors && (
             <Box textAlign="center">
               <Typography variant="h6" gutterBottom>
-                Select a Color
+                2. Select a Color
               </Typography>
               <Grid container spacing={2} justifyContent="center">
                 {Object.entries(colors).map(
@@ -253,7 +241,7 @@ const CreateYocc = () => {
                     color && (
                       <Grid item key={name}>
                         <Box
-                          onClick={() => handleColorSelect(color)}
+                          onClick={() => setSelectedColor(color)}
                           sx={{
                             width: 80,
                             height: 80,
@@ -280,17 +268,25 @@ const CreateYocc = () => {
           )}
 
           {selectedColor && (
-            <Button variant="contained" size="large" onClick={handleNextStep}>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handleNext}
+              sx={{ minWidth: 150 }}
+            >
               Next
             </Button>
           )}
         </Stack>
       )}
 
-      {/* ======================= LANGKAH 2: EDIT GAMBAR ======================= */}
+      {/* ======================= LANGKAH 2: GENERATE GAMBAR ======================= */}
       {activeStep === 1 && (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleGenerateSubmit}>
           <Stack spacing={4} alignItems="center">
+            <Typography variant="h6" gutterBottom>
+              Upload the image you want to edit
+            </Typography>
             <Stack
               direction={{ xs: "column", md: "row" }}
               spacing={4}
@@ -313,92 +309,136 @@ const CreateYocc = () => {
                   onClick={() => baseInputRef.current.click()}
                 />
               </Box>
-              <Box>
-                <ImagePreview
-                  label="Texture Reference"
-                  imageSrc={textureImagePreview}
-                  onClick={() => {}} // Tidak bisa diubah di langkah ini
-                  sx={{ cursor: "default", "&:hover": { bgcolor: "grey.50" } }}
-                />
-                <Typography variant="body2" mt={1}>
-                  Color:
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 2,
+                  bgcolor: "grey.50",
+                  width: "100%",
+                  maxWidth: "300px",
+                  height: "250px", // Kita pertahankan tinggi agar sejajar
+                  display: "flex",
+                  flexDirection: "column", // Mengatur konten secara vertikal
+                }}
+              >
+                <Typography variant="body2" mt={2}>
+                  Texture Reference:
+                </Typography>
+                {/* Kontainer untuk gambar agar ukurannya terkontrol */}
+                <Box
+                  sx={{
+                    flex: 1, // Biarkan kontainer ini mengisi ruang yang tersedia
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "hidden", // Sembunyikan bagian gambar yang berlebih
+                    borderRadius: 1,
+                    border: "1px solid #ddd",
+                    mt: 0.5,
+                    bgcolor: "white",
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={textureImagePreview}
+                    alt="Texture Preview"
+                    sx={{
+                      maxHeight: "100%", // Gambar tidak akan lebih tinggi dari kontainernya
+                      maxWidth: "100%", // Gambar tidak akan lebih lebar dari kontainernya
+                      objectFit: "contain", // Memastikan gambar pas tanpa distorsi
+                    }}
+                  />
+                </Box>
+
+                <Typography variant="body2" mt={1.5}>
+                  Selected Color:
+                </Typography>
+                <Box display="flex" alignItems="center" mt={0.5}>
                   <Box
                     component="span"
                     sx={{
-                      display: "inline-block",
-                      width: 16,
-                      height: 16,
+                      width: 24,
+                      height: 24,
                       bgcolor: selectedColor,
-                      verticalAlign: "middle",
-                      ml: 1,
-                      border: "1px solid black",
+                      border: "1px solid rgba(0,0,0,0.2)",
+                      borderRadius: "4px",
+                      mr: 1,
                     }}
                   />
-                  <Box component="span" sx={{ ml: 1, verticalAlign: "middle" }}>
+                  <Typography variant="body2" fontFamily="monospace">
                     {selectedColor}
-                  </Box>
-                </Typography>
-              </Box>
+                  </Typography>
+                </Box>
+              </Paper>
             </Stack>
 
             <TextField
-              label="Prompt (Auto-generated)"
+              label="Prompt"
               multiline
-              rows={8}
+              rows={5}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               variant="outlined"
               fullWidth
-              sx={{ maxWidth: "624px" }}
+              sx={{ maxWidth: "660px" }}
               InputProps={{ readOnly: true }}
             />
 
             {error && (
-              <Alert severity="error" sx={{ width: "100%", maxWidth: "624px" }}>
+              <Alert severity="error" sx={{ width: "100%", maxWidth: "660px" }}>
                 {error}
               </Alert>
             )}
 
             <Stack direction="row" spacing={2}>
-              <Button variant="outlined" onClick={handleBackStep}>
+              <Button variant="outlined" onClick={handleBack}>
                 Back
               </Button>
               <Button
                 type="submit"
                 variant="contained"
                 size="large"
-                disabled={isGenerating || !baseImageFile}
+                disabled={isLoading || !baseImageFile}
                 sx={{ minWidth: "200px", height: "50px" }}
               >
-                {isGenerating ? (
+                {isLoading ? (
                   <CircularProgress size={24} color="inherit" />
                 ) : (
                   "Generate Image"
                 )}
               </Button>
             </Stack>
-
-            {generatedImage && (
-              <Box mt={4} textAlign="center">
-                <Typography variant="h5" gutterBottom>
-                  Generated Image
-                </Typography>
-                <Box
-                  component="img"
-                  src={generatedImage}
-                  alt="Generated result"
-                  sx={{
-                    width: "100%",
-                    maxWidth: 700,
-                    height: "auto",
-                    borderRadius: 2,
-                    boxShadow: 3,
-                  }}
-                />
-              </Box>
-            )}
           </Stack>
         </form>
+      )}
+
+      {/* ======================= LANGKAH 3: HASIL ======================= */}
+      {activeStep === 2 && (
+        <Stack spacing={3} alignItems="center">
+          <Typography variant="h5" gutterBottom>
+            Generation Successful!
+          </Typography>
+          <Box
+            component="img"
+            src={generatedImage}
+            alt="Generated result"
+            sx={{
+              width: "100%",
+              maxWidth: 800,
+              height: "auto",
+              borderRadius: 2,
+              boxShadow: 5,
+            }}
+          />
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<ReplayIcon />}
+            onClick={handleReset}
+          >
+            Create Another Image
+          </Button>
+        </Stack>
       )}
     </Box>
   );
