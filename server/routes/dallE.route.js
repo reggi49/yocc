@@ -173,6 +173,10 @@ router.post(
       const textureImageFile = req.files.textureImage[0];
       const prompt = req.body.prompt;
 
+      console.log('baseImageFile',baseImageFile)
+      console.log('textureImageFile', textureImageFile)
+      console.log('prompt', prompt)
+      
       // Siapkan 'contents' dengan format array datar yang benar
       const contents = [
         { text: prompt },
