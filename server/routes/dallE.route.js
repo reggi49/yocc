@@ -157,7 +157,8 @@ router.post("/describe", authenticate, async (req, res, next) => {
 });
 
 router.post(
-  "/edit-with-texture", // Anda bisa menggunakan nama route utama sekarang
+  "/edit-with-texture", 
+  authenticate,// Anda bisa menggunakan nama route utama sekarang
   upload.fields([
     { name: 'baseImage', maxCount: 1 },
     { name: 'textureImage', maxCount: 1 },
@@ -176,7 +177,7 @@ router.post(
       console.log('baseImageFile',baseImageFile)
       console.log('textureImageFile', textureImageFile)
       console.log('prompt', prompt)
-      
+
       // Siapkan 'contents' dengan format array datar yang benar
       const contents = [
         { text: prompt },
