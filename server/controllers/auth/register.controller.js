@@ -5,15 +5,16 @@ import bcrypt from "bcrypt";
 
 const registerController = {
   async register(req, res, next) {
-    const { firstName, lastName, email, password } = req.body;
+    const { firstName, lastName, email, password, address } = req.body;
 
     // validation
     const schema = Joi.object({
       firstName: Joi.string().min(3).max(30).required(),
       email: Joi.string().email().required(),
       password: Joi.string().required(),
+      address: Joi.string().required(),
     });
-    const { error } = schema.validate({ firstName, email, password });
+    const { error } = schema.validate({ firstName, email, password, address });
 
     if (error) {
       return next(error);
@@ -36,6 +37,7 @@ const registerController = {
         ...(lastName && { lastName }),
         email,
         password: hashedPwd,
+        address,
       };
 
       // const user = new User(payload);

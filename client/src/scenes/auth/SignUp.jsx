@@ -31,6 +31,7 @@ export default function SignUp() {
     email: "",
     password: "",
     confirmPassword: "",
+    address: "", 
   };
 
   const validationSchema = yup.object().shape({
@@ -48,6 +49,7 @@ export default function SignUp() {
       .string()
       .required("Required")
       .oneOf([yup.ref("password"), null], "Passwords don't match."),
+    address: yup.string().trim().required("Address is required"),
   });
 
   const handleFormSubmit = (values, { resetForm, setSubmitting }) => {
@@ -84,7 +86,7 @@ export default function SignUp() {
     >
       <Link to="/">
         <img
-          style={{ width: "100px", marginBottom: "100px" }}
+          style={{ width: "100px", marginBottom: "20px" }}
           src={logo}
           alt="logo"
         />
@@ -192,6 +194,23 @@ export default function SignUp() {
                   </InputAdornment>
                 ),
               }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              required
+              onBlur={handleBlur}
+              onChange={handleChange}
+              value={values.address}
+              error={!!touched.address && !!errors.address} //converting value to a boolean
+              helperText={touched.address && errors.address}
+              fullWidth
+              id="address"
+              label="Address"
+              name="address"
+              autoComplete="address"
+              multiline
+              rows={3} 
             />
           </Grid>
           <Grid item xs={12}>

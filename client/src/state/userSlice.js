@@ -34,13 +34,14 @@ export default userSlice.reducer;
 export const register =
   ({ values, resetForm, setSubmitting, navigate }) =>
   () => {
-    const { firstName, lastName, email, password } = values;
+    const { firstName, lastName, email, password, address } = values;
     instance
       .post("/api/v1/auth/register", {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim().toLowerCase(),
         password: password.trim(),
+        address: address.trim(),
       })
 
       .then((data) => {

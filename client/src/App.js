@@ -34,6 +34,7 @@ import { backdropContext } from "./context/BackdropContext";
 import useDebounce from "./hooks/useDebounce";
 import Collections from "./scenes/Collections";
 import CreateYocc from "./scenes/yocc/CreateYocc";
+import OrderCustomColor from "./scenes/yocc/OrderCustomColor";
 import SavedPosts from "./components/SavedPosts";
 import ResetPwd from "./scenes/auth/resetPassword/ResetPwd";
 import ResetPwdInstructions from "./scenes/auth/resetPassword/ResetPwdInstructions";
@@ -183,6 +184,14 @@ function App() {
             element={
               <PrivateRoute>
                 <CreateYocc/>
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/order"
+            element={
+              <PrivateRoute>
+                <OrderCustomColor />
               </PrivateRoute>
             }
           />

@@ -34,23 +34,56 @@ export default function DDButton({ image, prompt }) {
     setAnchorEl(event.currentTarget);
     if (collections.length === 0) dispatch(getUserCollections());
   };
+
+  const blobUrlToBase64 = async (blobUrl) => {
+    const response = await fetch(blobUrl);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        resolve(reader.result);
+      };
+      reader.readAsDataURL(blob);
+    });
+  };
+
   const handleClose = () => {
     setCreateCollection(false);
     setInput("");
     setAnchorEl(null);
   };
 
-  const handleSave = (collectionId, collectionName) => {
+  const handleSave = async (collectionId, collectionName) => {
+    // 1. Jadikan fungsi ini 'async'
+    let imageToSend = image; // Gunakan gambar yang ada secara default
+
+    // 2. Lakukan konversi HANYA jika gambar adalah blob URL
+    if (image.startsWith("blob:")) {
+      try {
+        console.log("Converting blob URL to Base64 for saving...");
+        imageToSend = await blobUrlToBase64(image);
+      } catch (err) {
+        console.error("Failed to convert image for saving:", err);
+        // toast.error("Failed to prepare image for saving.");
+        handleClose();
+        return; // Hentikan fungsi jika konversi gagal
+      }
+    }
+
+    // 3. Siapkan argumen dengan data gambar yang sudah benar
     const args = {
       handleClose,
-      image,
+      image: imageToSend, // Gunakan gambar yang sudah dikonversi atau URL asli
       prompt,
       collectionId,
       collectionName,
     };
+
+    // 4. Dispatch action
     dispatch(createSavedPost(args));
   };
-
+  
   const handleCreate = () => {
     const args = { cb: setCreateCollection, input, setInput };
     dispatch(createUserCollection(args));

@@ -17,17 +17,20 @@ import {
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import React, { useContext, useEffect, useState, useRef } from "react";
 import { shallowEqual, useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from 'uuid';
+import { setGeneratedPost } from "../../state/formSlice"; 
 import Posts from "../../components/Posts";
 import { fetchUserPosts } from "../../state/userPostsSlice";
 import { backdropContext } from "../../context/BackdropContext";
 import { shades } from "../../theme";
 import { FlexBox } from "../../components/FlexBox";
-import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { Vibrant } from "node-vibrant/browser";
 import { privateInstance } from "../../utils/apiInstances";
 import Input from "../../components/Input";
 import ReplayIcon from "@mui/icons-material/Replay";
+import DoneOutlineOutlined from "@mui/icons-material/DoneOutlineOutlined";
 
 
 // --- Helper Component ---
@@ -70,6 +73,8 @@ const steps = ["Select Texture & Color", "Generate Your Image", "View Result"];
 
 // --- Main Component ---
 const CreateYocc = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   // State untuk mengontrol langkah saat ini
   const [activeStep, setActiveStep] = useState(0);
 
@@ -114,7 +119,8 @@ const CreateYocc = () => {
     reader.onload = (event) => {
       const imgSrc = event.target.result;
       setTextureImagePreview(imgSrc);
-      Vibrant.from(imgSrc).getPalette()
+      Vibrant.from(imgSrc)
+        .getPalette()
         .then((palette) => {
           setColors({
             Vibrant: palette.Vibrant?.hex,
@@ -132,7 +138,7 @@ const CreateYocc = () => {
     };
     reader.readAsDataURL(file);
   };
-  
+
   const handleNext = () => {
     if (activeStep === 0) {
       const newPrompt = `Strictly follow these instructions. You are an expert photo editor. Your only output must be the edited image, with no accompanying text or explanation. From the first image provided (the base image), identify the main seating object (sofa, chair, or bench). Replace the texture of ONLY that seating object with the texture from the second image provided. The color of the new texture must be precisely ${selectedColor}. Maintain the original shape, folds, lighting, and shadows of the seating object perfectly. All other elements in the room must remain completely unchanged.`;
@@ -145,7 +151,7 @@ const CreateYocc = () => {
     setError("");
     setActiveStep((prev) => prev - 1);
   };
-  
+
   const handleReset = () => {
     setActiveStep(0);
     setTextureImageFile(null);
@@ -158,7 +164,27 @@ const CreateYocc = () => {
     setIsLoading(false);
     setError("");
     setColors(null);
-  }
+  };
+
+  const handleFinish = () => {
+    if (!generatedImage) return;
+
+    // 1. Buat ID unik untuk gambar baru
+    const newId = uuidv4();
+
+    // 2. Siapkan data post yang akan dikirim ke Redux
+    const newPost = {
+      id: newId,
+      image: generatedImage,
+      prompt: prompt,
+    };
+
+    // 3. Kirim data ke Redux store menggunakan action baru kita
+    dispatch(setGeneratedPost(newPost));
+
+    // 4. Navigasi ke halaman detail dengan ID baru
+    navigate(`/search/single/${newId}`);
+  };
 
   const handleGenerateSubmit = async (e) => {
     e.preventDefault();
@@ -166,7 +192,7 @@ const CreateYocc = () => {
       setError("Please complete all required fields.");
       return;
     }
-    
+
     setIsLoading(true);
     setError("");
 
@@ -189,12 +215,13 @@ const CreateYocc = () => {
       handleNext(); // Pindah ke langkah 3 setelah berhasil
     } catch (err) {
       console.error("Image generation failed:", err);
-      setError("Failed to generate image. The model may not support this request. Please try a different image or prompt.");
+      setError(
+        "Failed to generate image. The model may not support this request. Please try a different image or prompt."
+      );
     } finally {
       setIsLoading(false);
     }
   };
-
 
   // --- Render Logic ---
   return (
@@ -430,14 +457,24 @@ const CreateYocc = () => {
               boxShadow: 5,
             }}
           />
-          <Button
-            variant="contained"
-            size="large"
-            startIcon={<ReplayIcon />}
-            onClick={handleReset}
-          >
-            Create Another Image
-          </Button>
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<ReplayIcon />}
+              onClick={handleReset}
+            >
+              Buat Ulang Gambar
+            </Button>
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<DoneOutlineOutlined />}
+              onClick={handleFinish}
+            >
+              Selesai
+            </Button>
+          </Stack>
         </Stack>
       )}
     </Box>

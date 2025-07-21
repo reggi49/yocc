@@ -18,6 +18,7 @@ import {
   mailRoutes,
   collectionsRoutes,
   savedPostsRoutes,
+  ordersRoutes,
 } from "./routes/index.js";
 import cookieParser from "cookie-parser";
 import path from "path";
@@ -50,6 +51,7 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/mail", mailRoutes);
 app.use("/api/v1/collections", collectionsRoutes);
 app.use("/api/v1/savedposts", savedPostsRoutes);
+app.use("/api/v1/orders", ordersRoutes);
 
 app.get("/", async (req, res) => {
   res.send("Hello from YOCC");

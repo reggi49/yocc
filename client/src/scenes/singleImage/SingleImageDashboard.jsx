@@ -16,6 +16,7 @@ import { downloadImage, STATUS } from "../../utils";
 import { createPost } from "../../state/postsSlice";
 import DDButton from "./DDButton";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'; // Import ikon baru
 
 const SingleImageDashboard = () => {
   const isMobile = useMediaQuery("(max-width:767px)");
@@ -34,14 +35,57 @@ const SingleImageDashboard = () => {
 
   const shareBtnlabel =
     "Once you've created the image you want, you can share it with others in the community";
+  
+  const handleOrder = () => {
+    // Navigasi ke halaman form pemesanan, sambil mengirim data gambar dan prompt
+    navigate("/order", {
+      state: {
+        image,
+        prompt,
+      },
+    });
+  };
 
-  const handleShare = () => {
-    const args = { image, prompt };
-    dispatch(createPost(args));
+  const handleShare = async () => {
+    // 1. Jadikan fungsi ini 'async'
+    // Hanya konversi jika 'image' adalah blob URL
+    if (image.startsWith("blob:")) {
+      try {
+        console.log("Converting blob URL to Base64 for sharing...");
+        // 2. Tunggu proses konversi selesai
+        const imageAsBase64 = await blobUrlToBase64(image);
+
+        // 3. Kirim data Base64 ke Redux
+        const args = { image: imageAsBase64, prompt };
+        dispatch(createPost(args));
+        console.log("Dispatching createPost with Base64 data.");
+      } catch (err) {
+        console.error("Failed to convert image for sharing:", err);
+        // Tampilkan error ke pengguna jika perlu
+      }
+    } else {
+      // Jika 'image' sudah dalam format lain (misalnya URL dari Cloudinary),
+      // langsung kirim saja.
+      const args = { image, prompt };
+      dispatch(createPost(args));
+    }
   };
 
   const handleDownload = () => {
     downloadImage({ id, url: image });
+  };
+
+  const blobUrlToBase64 = async (blobUrl) => {
+    const response = await fetch(blobUrl);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        resolve(reader.result);
+      };
+      reader.readAsDataURL(blob);
+    });
   };
 
   return (
@@ -79,6 +123,10 @@ const SingleImageDashboard = () => {
               <Btn onClick={handleDownload}>
                 <FileDownloadOutlinedIcon />
               </Btn>
+              <Btn onClick={handleOrder}>
+                <ShoppingCartIcon sx={{ mr: 1 }} />
+                Pesan
+              </Btn>
               <Box title={shareBtnlabel} position="relative">
                 <Btn disabled={status === STATUS.LOADING} onClick={handleShare}>
                   Share with community
@@ -114,6 +162,11 @@ const SingleImageDashboard = () => {
       {/* download and share button for mobile sscreen */}
       {isMobile && (
         <FlexBox pt="30px" mt="auto" columnGap="10px">
+          <Box flex={1}>
+            <Btn fullWidth mobile={isMobile.toString()} onClick={handleOrder}>
+              Pesan
+            </Btn>
+          </Box>
           <Box flex={1}>
             <Btn
               fullWidth

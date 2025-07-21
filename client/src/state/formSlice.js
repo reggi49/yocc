@@ -25,10 +25,16 @@ export const formSlice = createSlice({
     setStatus: (state, action) => {
       return { ...state, status: action.payload };
     },
+    setGeneratedPost: (state, action) => {
+      // Menetapkan state 'posts' hanya dengan satu item dari payload
+      // dan memberikan 'index: 0' karena ini adalah satu-satunya gambar.
+      state.posts = [{ ...action.payload, index: 0 }];
+      state.status = STATUS.IDLE;
+    },
   },
 });
 
-export const { updateForm, setStatus } = formSlice.actions;
+export const { updateForm, setStatus, setGeneratedPost } = formSlice.actions;
 export default formSlice.reducer;
 
 export const generatePosts =
