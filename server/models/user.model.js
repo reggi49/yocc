@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
     avatar: { type: Object, default: null },
     verified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    isAdmin: { type: Boolean, default: false },
     resetToken: { type: Object, default: null },
   },
   { timestamps: true, versionKey: false }

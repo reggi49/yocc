@@ -22,6 +22,7 @@ import { backdropContext } from "../../context/BackdropContext";
 const pages = [
   { title: "Your posts", url: "/userposts" },
   { title: "Collections", url: "/collections" },
+  { title: "My Orders", url: "/myorders" },
 ];
 
 const UserAvatar = ({ user, setEmailVerificationAlert }) => {
@@ -188,6 +189,26 @@ function Navbar({ setEmailVerificationAlert }) {
             </Typography>
           </Button>
         ))}
+        {user?.isAdmin ? (
+          <Button
+            key={99}
+            onClick={() => {
+              navigate("/managesorders");
+            }}
+            sx={{ display: "block" }}
+          >
+            <Typography
+              fontWeight="bold"
+              fontSize="15px"
+              color={shades.primary[300]}
+              textTransform="none"
+            >
+              {"Manages Orders"}
+            </Typography>
+          </Button>
+        ) : (
+          ""
+        )}
       </Box>
 
       {/* Menu icon for mobile */}
@@ -238,6 +259,25 @@ function Navbar({ setEmailVerificationAlert }) {
               </Typography>
             </MenuItem>
           ))}
+          {user?.isAdmin ? (
+            <MenuItem
+              sx={{
+                p: "12px 24px",
+                borderBottom: `1px solid ${shades.secondary[300]}`,
+              }}
+              key={99}
+              onClick={() => {
+                handleCloseNavMenu();
+                navigate("/managesorders");
+              }}
+            >
+              <Typography fontSize="16px" fontWeight="bold" textAlign="center">
+                {"Manages Orders"}
+              </Typography>
+            </MenuItem>
+          ) : (
+            ""
+          )}
         </Menu>
       </Box>
 

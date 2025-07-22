@@ -1,6 +1,6 @@
 import Joi from "joi";
 import cloudinary from "../config/cloudinary.js";
-import Order from "../models/order.model.js"; // <-- Gunakan model Order yang baru
+import Order from "../models/order.model.js"; 
 
 const ordersController = {
     async createCustomOrder(req, res, next) {
@@ -74,6 +74,67 @@ const ordersController = {
 
         } catch (err) {
             // Jika terjadi error, kirim ke error handler
+            return next(err);
+        }
+    },
+
+    async getUserOrders(req, res, next) {
+        try {
+            // Ambil ID user dari middleware 'authenticate'
+            const { _id: userId } = req.user;
+
+            // Cari semua pesanan di database yang cocok dengan ID user
+            // Urutkan berdasarkan yang terbaru
+            const orders = await Order.find({ user: userId }).sort({ createdAt: -1 });
+
+            res.status(200).json(orders);
+        } catch (err) {
+            return next(err);
+        }
+    },
+
+    async getAllOrders(req, res, next) {
+        try {
+            // Ambil semua pesanan, urutkan dari yang terbaru,
+            // dan sertakan data nama & email dari user yang memesan
+            const orders = await Order.find()
+                .populate("user", "firstName lastName email address")
+                .sort({ createdAt: -1 });
+            res.status(200).json(orders);
+        } catch (err) {
+            return next(err);
+        }
+    },
+
+    /**
+     * Mengubah status pesanan berdasarkan ID
+     */
+    async updateOrderStatus(req, res, next) {
+        const { status } = req.body;
+        const { id } = req.params;
+
+        // Validasi input status
+        const validationSchema = Joi.object({
+            status: Joi.string().valid('Pending', 'Processing', 'Shipped', 'Completed', 'Cancelled').required(),
+        });
+        const { error } = validationSchema.validate({ status });
+        if (error) {
+            return next(error);
+        }
+
+        try {
+            const updatedOrder = await Order.findByIdAndUpdate(
+                id,
+                { status: status },
+                { new: true } // Mengembalikan dokumen yang sudah di-update
+            );
+
+            if (!updatedOrder) {
+                return next(CustomErrorHandler.notFound("Order not found."));
+            }
+
+            res.status(200).json({ success: true, message: "Order status updated successfully.", order: updatedOrder });
+        } catch (err) {
             return next(err);
         }
     },

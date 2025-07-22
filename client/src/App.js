@@ -35,6 +35,8 @@ import useDebounce from "./hooks/useDebounce";
 import Collections from "./scenes/Collections";
 import CreateYocc from "./scenes/yocc/CreateYocc";
 import OrderCustomColor from "./scenes/yocc/OrderCustomColor";
+import MyOrders from "./scenes/yocc/MyOrders";
+import AdminOrders from "./scenes/yocc/AdminOrders";
 import SavedPosts from "./components/SavedPosts";
 import ResetPwd from "./scenes/auth/resetPassword/ResetPwd";
 import ResetPwdInstructions from "./scenes/auth/resetPassword/ResetPwdInstructions";
@@ -194,6 +196,21 @@ function App() {
                 <OrderCustomColor />
               </PrivateRoute>
             }
+          />
+          <Route 
+            path="/myorders" 
+            element={
+              <PrivateRoute>
+                <MyOrders />
+              </PrivateRoute>
+            } 
+          />
+          <Route path="/managesorders" 
+          element={
+              <PrivateRoute>
+                {user && user.isAdmin ? <AdminOrders /> : <Navigate to="/" />}
+              </PrivateRoute>
+          }
           />
           <Route path="*" element={<NotFound />} />
         </Routes>

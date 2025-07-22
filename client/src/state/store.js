@@ -6,6 +6,7 @@ import userPostsReducer from "./userPostsSlice";
 import savedPostsReducer from "./savedPostsSlice";
 import collectionsReducer from "./collectionsSlice";
 import resetPwdReducer from "./resetPwdSlice";
+import ordersReducer from "./ordersSlice";
 
 export const store = configureStore({
   reducer: {
@@ -16,5 +17,6 @@ export const store = configureStore({
     savedPostsReducer,
     collectionsReducer,
     resetPwdReducer,
+    ordersReducer: ordersReducer,
   },
 });
