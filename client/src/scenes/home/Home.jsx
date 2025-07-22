@@ -68,32 +68,65 @@ const Home = () => {
 
       {/* Heading */}
       {!!user && (
-        <Box padding={{ xs: 0, md: "0 10px" }}>
-          <FlexBox justifyContent="space-between">
-            <Typography mb="5px" variant="h3">
-              Make Dreams Come True
-            </Typography>
-            <Button
-              variant="contained"
-              sx={{ textTransform: "none" }}
-              onClick={() => {
-                navigate("/CreateYocc");
+        <Box
+          sx={{
+            textAlign: "center",
+            py: { xs: 6, md: 10 }, // Padding vertikal lebih besar
+            px: 2,
+            backgroundColor: shades.secondary[100], // Warna latar belakang lembut
+            borderRadius: 3,
+            border: `1px solid ${shades.secondary[200]}`,
+          }}
+        >
+          <Stack spacing={2} alignItems="center">
+            {/* Judul Utama */}
+            <Typography
+              variant="h2"
+              component="h1"
+              fontWeight="bold"
+              color="primary.main"
+              sx={{
+                fontSize: { xs: "2.5rem", md: "3.5rem" },
               }}
             >
-              <AddIcon
-                fontSize="small"
-                sx={{
-                  mr: "5px",
-                }}
-              />
+              Make Your Dreams Come True
+            </Typography>
+
+            {/* Sub-judul Deskriptif */}
+            <Typography
+              variant="h6"
+              color="text.secondary"
+              sx={{
+                maxWidth: "600px",
+                mb: 3, // Margin bawah untuk memberi ruang sebelum tombol
+              }}
+            >
+              Ciptakan gambar imajinatif dan menakjubkan secara visual melalui
+              YOCC AI dan bagikan dengan komunitas.
+            </Typography>
+
+            {/* Tombol Call-to-Action yang Menonjol */}
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<AddIcon />}
+              onClick={() => navigate("/CreateYocc")}
+              sx={{
+                textTransform: "none",
+                fontSize: "1.1rem",
+                fontWeight: "bold",
+                padding: "12px 32px", // Padding lebih besar
+                borderRadius: "50px", // Tombol lebih bulat
+                boxShadow: "0 4px 14px 0 rgba(0, 118, 255, 0.39)", // Efek bayangan
+                transition: "transform 0.2s ease-in-out",
+                "&:hover": {
+                  transform: "scale(1.05)",
+                },
+              }}
+            >
               Create Yocc
             </Button>
-          </FlexBox>
-
-          <Typography variant="small" color={shades.primary[300]}>
-            Ciptakan gambar yang imajinatif dan menakjubkan secara visual
-            melalui YOCC AI dan bagikan dengan komunitas.
-          </Typography>
+          </Stack>
 
           {/* <FlexBox m="20px 0 15px" columnGap={2}>
             <Typography color={shades.primary[300]}>
