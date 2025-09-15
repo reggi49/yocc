@@ -166,7 +166,7 @@ const AdminOrders = () => {
                           : order.status === "Cancelled"
                           ? "error.light"
                           : "grey.300",
-                      color: "black",
+                      color: "white",
                       borderRadius: "12px",
                       px: 1.5,
                       py: 0.5,

@@ -259,7 +259,7 @@ export const mailController = {
       };
 
       await transporter.sendMail({
-        from: '"YOCC#️⃣" <hashmatw555@gmail.com>', // sender address
+        from: '"YOCC#️⃣" <mbtechweb@gmail.com>', // sender address
         to: email, // list of receivers
         subject: "Change password for OpenAI",
         html: resetPasswordTemplate(email, user.firstName, token),

@@ -190,7 +190,7 @@ router.post(
       // Panggil API dengan metode yang benar: genAI.models.generateContent
       // dan masukkan semua konfigurasi dalam satu objek.
       const result = await genAI.models.generateContent({
-        model: "gemini-2.0-flash-preview-image-generation",
+        model: "gemini-2.5-flash-image-preview",
         contents: contents,
         config: {
           responseModalities: [Modality.IMAGE, Modality.TEXT],

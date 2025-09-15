@@ -24,6 +24,7 @@ import { useDispatch } from "react-redux";
 import { backdropContext } from "../../context/BackdropContext";
 import { FlexBox } from "../../components/FlexBox";
 import logo from "../../assets/smallLogo.svg";
+import mbtech from "../../assets/MBtech.png";
 
 export default function SignIn({ setEmailVerificationAlert }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -96,13 +97,20 @@ export default function SignIn({ setEmailVerificationAlert }) {
         alignItems: "center",
       }}
     >
-      <Link to="/">
-        <img
-          style={{ width: "100px", marginBottom: "100px" }}
-          src={logo}
-          alt="logo"
-        />
-      </Link>
+      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+        <Link to="/">
+          <img style={{ width: "100px" }} src={logo} alt="YOCC Logo" />
+        </Link>
+        <Typography
+          color={shades.primary[400]}
+          fontSize="18px"
+        >
+          Supported By
+        </Typography>
+        <Link to="/">
+          <img style={{ width: "100px" }} src={mbtech} alt="MBtech Logo" />
+        </Link>
+      </div>
       <Typography color={shades.primary[400]} fontSize="28px" fontWeight="bold">
         Welcome back
       </Typography>

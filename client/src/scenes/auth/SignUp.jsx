@@ -18,6 +18,7 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { register } from "../../state/userSlice";
 import logo from "../../assets/smallLogo.svg";
+import mbtech from "../../assets/MBtech.png";
 
 export default function SignUp() {
   const dispatch = useDispatch();
@@ -84,13 +85,17 @@ export default function SignUp() {
         alignItems: "center",
       }}
     >
-      <Link to="/">
-        <img
-          style={{ width: "100px", marginBottom: "20px" }}
-          src={logo}
-          alt="logo"
-        />
-      </Link>
+      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+        <Link to="/">
+          <img style={{ width: "100px" }} src={logo} alt="YOCC Logo" />
+        </Link>
+        <Typography color={shades.primary[400]} fontSize="18px">
+          Supported By
+        </Typography>
+        <Link to="/">
+          <img style={{ width: "100px" }} src={mbtech} alt="MBtech Logo" />
+        </Link>
+      </div>
       <Typography color={shades.primary[400]} fontSize="28px" fontWeight="bold">
         Create your account
       </Typography>
@@ -210,7 +215,7 @@ export default function SignUp() {
               name="address"
               autoComplete="address"
               multiline
-              rows={3} 
+              rows={3}
             />
           </Grid>
           <Grid item xs={12}>

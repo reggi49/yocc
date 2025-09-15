@@ -10,6 +10,7 @@ import TwitterIcon from "@mui/icons-material/Twitter";
 import { FlexBox } from "../../components/FlexBox";
 import { Link, useLocation } from "react-router-dom";
 import { shades } from "../../theme";
+import mbtech from "../../assets/MBtech.png";
 
 const quickLinks = [
   { title: "About", url: "/about" },
@@ -50,6 +51,11 @@ const Footer = () => {
             <Typography mb="10px" fontWeight="bold">
               Contact
             </Typography>
+            <img
+              src={mbtech}
+              alt="Supported by MBtech"
+              style={{ width: "50px", marginBottom: "10px" }}
+            />
             <Typography mt="2px" fontSize="15px">
               PT XYZ
             </Typography>
@@ -94,12 +100,12 @@ const Footer = () => {
           }}
         >
           <Typography fontSize="16px" fontFamily="'Noto Serif JP', serif">
-            Yocc © 2025
+            YOCC © 2025
           </Typography>
           <FlexBox gap={4} justifyContent="flex-end">
             <a
               rel="noreferrer"
-              href="https://github.com/hashmat-noorani"
+              href="#"
               title="github"
               target="_blank"
             >
@@ -107,7 +113,7 @@ const Footer = () => {
             </a>
             <a
               rel="noreferrer"
-              href="https://www.linkedin.com/in/hashmat-noorani/"
+              href="#"
               title="Linkedin"
               target="_blank"
             >
@@ -115,7 +121,7 @@ const Footer = () => {
             </a>
             <a
               rel="noreferrer"
-              href="https://www.facebook.com/hwx.75"
+              href="#"
               title="facebook"
               target="_blank"
             >
@@ -123,7 +129,7 @@ const Footer = () => {
             </a>
             <a
               rel="noreferrer"
-              href="https://twitter.com/hashmatwani_x"
+              href="#"
               title="Twitter"
               target="_blank"
             >
@@ -131,7 +137,7 @@ const Footer = () => {
             </a>
             <a
               rel="noreferrer"
-              href="https://www.freecodecamp.org/HashmatNoorani"
+              href="#"
               title="freeCodeCamp"
               target="_blank"
             >
